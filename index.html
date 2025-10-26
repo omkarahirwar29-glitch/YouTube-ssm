@@ -1,10 +1,12 @@
 <meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Umesh SMM Service - Login</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Shakar Video Rewards</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -13,952 +15,730 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        :root {
-            --primary: #4361ee;
-            --secondary: #3a0ca3;
-            --accent: #7209b7;
-            --light: #f8f9fa;
-            --dark: #212529;
-            --success: #4cc9f0;
-            --text: #333333;
-            --text-light: #6c757d;
-            --error: #e63946;
-        }
-
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            padding: 0;
-            overflow-x: hidden;
+            color: white;
+            padding: 20px;
         }
 
         .container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            max-width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
             padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
         }
 
         .header {
-            padding: 20px 0;
             text-align: center;
-            color: white;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
         }
 
         .logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
+            font-size: 3em;
             margin-bottom: 10px;
         }
 
-        .logo-icon {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 50px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            backdrop-filter: blur(10px);
+        .app-title {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+            font-weight: bold;
         }
 
-        .logo-icon i {
-            font-size: 24px;
-            color: white;
+        .coins-display {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: black;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.2em;
+            display: inline-block;
+            margin: 10px 0;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
-        .logo-text h1 {
-            font-size: 24px;
-            font-weight: 700;
-            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        }
-
-        .logo-text p {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
-        .login-card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 30px 25px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-            backdrop-filter: blur(10px);
-            animation: fadeIn 0.8s ease-out;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .card-header {
+        .user-info {
             text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .card-header h2 {
-            color: var(--dark);
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .card-header p {
-            color: var(--text-light);
-            font-size: 16px;
-        }
-
-        .login-form {
-            margin-bottom: 25px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--text);
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        .input-with-icon {
-            position: relative;
-        }
-
-        .input-with-icon i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-light);
-            font-size: 18px;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 16px 15px 16px 50px;
-            border: 2px solid #e9ecef;
-            border-radius: 12px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background: #f8f9fa;
-        }
-
-        .form-control:focus {
-            border-color: var(--primary);
-            background: white;
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
-            outline: none;
-        }
-
-        .options {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            font-size: 14px;
-        }
-
-        .remember-me {
-            display: flex;
-            align-items: center;
-        }
-
-        .remember-me input {
-            margin-right: 8px;
-        }
-
-        .forgot-password {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-
-        .forgot-password:hover {
-            color: var(--secondary);
-            text-decoration: underline;
-        }
-
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
             margin-bottom: 15px;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4);
+        .user-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            border: 3px solid gold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.5);
+        .user-name {
+            font-size: 1.2em;
+            font-weight: bold;
         }
 
-        .divider {
-            display: flex;
-            align-items: center;
-            margin: 20px 0;
-            color: var(--text-light);
-            font-size: 14px;
+        .video-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 20px;
+            position: relative;
         }
 
-        .divider::before,
-        .divider::after {
-            content: "";
-            flex: 1;
-            height: 1px;
-            background: #e9ecef;
-        }
-
-        .divider span {
-            padding: 0 15px;
-        }
-
-        .btn-google {
+        .video-placeholder {
+            width: 100%;
+            height: 200px;
+            background: #000;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            background: white;
-            color: var(--text);
-            border: 2px solid #e9ecef;
-            font-weight: 500;
-            transition: all 0.3s;
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #333, #555);
+            color: #ccc;
         }
 
-        .btn-google:hover {
-            border-color: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .google-icon {
-            width: 20px;
-            height: 20px;
-            background: conic-gradient(from -45deg, #ea4335 110deg, #4285f4 90deg 180deg, #34a853 180deg 270deg, #fbbc05 270deg) 73% 55%/150% 150% no-repeat;
-            border-radius: 2px;
-        }
-
-        .signup-link {
+        .video-title {
+            font-size: 1.1em;
+            margin-bottom: 15px;
             text-align: center;
-            margin-top: 20px;
-            color: var(--text-light);
-            font-size: 15px;
+            font-weight: bold;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
         }
 
-        .signup-link a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-
-        .signup-link a:hover {
-            color: var(--secondary);
-            text-decoration: underline;
-        }
-
-        .features {
+        .video-controls {
             display: flex;
             justify-content: space-between;
-            margin-top: 30px;
-            text-align: center;
+            margin-bottom: 15px;
         }
 
-        .feature {
-            flex: 1;
-            padding: 15px 10px;
-        }
-
-        .feature i {
-            font-size: 24px;
-            color: var(--primary);
-            margin-bottom: 10px;
-        }
-
-        .feature h3 {
-            font-size: 14px;
-            color: var(--text);
-            margin-bottom: 5px;
-        }
-
-        .feature p {
-            font-size: 12px;
-            color: var(--text-light);
-        }
-
-        .footer {
-            text-align: center;
-            padding: 20px;
+        .control-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
             color: white;
-            font-size: 14px;
-            opacity: 0.8;
-        }
-
-        /* Error message styling */
-        .error-message {
-            background: rgba(230, 57, 70, 0.1);
-            color: var(--error);
-            padding: 12px 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            display: none;
-            border-left: 4px solid var(--error);
-        }
-
-        /* Success message styling */
-        .success-message {
-            background: rgba(76, 201, 240, 0.1);
-            color: var(--success);
-            padding: 12px 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            display: none;
-            border-left: 4px solid var(--success);
-        }
-
-        /* Loading animation */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 10px;
-            vertical-align: middle;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Tabs for login/signup */
-        .tabs {
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            margin: 0 5px;
             display: flex;
-            margin-bottom: 25px;
-            background: #f1f3f5;
-            border-radius: 12px;
-            padding: 5px;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
         }
 
-        .tab {
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .watch-now-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .watch-now-btn:hover {
+            background: #cc0000;
+            transform: translateY(-2px);
+        }
+
+        .timer-display {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 15px 0;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 5px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-tab {
             flex: 1;
             text-align: center;
             padding: 12px;
-            border-radius: 10px;
             cursor: pointer;
+            border-radius: 10px;
             transition: all 0.3s;
-            font-weight: 500;
-            color: var(--text-light);
+            font-weight: bold;
         }
 
-        .tab.active {
-            background: white;
-            color: var(--primary);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        .nav-tab.active {
+            background: rgba(255, 255, 255, 0.2);
         }
 
-        .tab-content {
+        .page {
             display: none;
+            animation: fadeIn 0.5s;
         }
 
-        .tab-content.active {
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .page.active {
             display: block;
         }
 
-        /* Debug info */
-        .debug-info {
-            background: rgba(0, 0, 0, 0.1);
-            padding: 10px;
-            border-radius: 8px;
-            margin-top: 15px;
-            font-size: 12px;
-            color: var(--text-light);
+        .campaign-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .campaign-title {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: gold;
+        }
+
+        .start-campaign-btn {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            color: black;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .start-campaign-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .start-campaign-btn:disabled {
+            background: #666;
+            color: #999;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .lock-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
             display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            flex-direction: column;
         }
 
-        /* Mobile-specific adjustments */
-        @media (max-width: 480px) {
-            .container {
-                padding: 15px;
-            }
-            
-            .login-card {
-                padding: 25px 20px;
-            }
-            
-            .logo-text h1 {
-                font-size: 22px;
-            }
-            
-            .features {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .card-header h2 {
-                font-size: 22px;
-            }
+        .warning-message {
+            background: white;
+            color: black;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 300px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
         }
 
-        @media (max-width: 360px) {
-            .options {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
+        .warning-title {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: #ff4444;
         }
 
-        /* Landscape mode adjustments */
-        @media (max-height: 600px) and (orientation: landscape) {
-            .container {
-                padding: 10px;
-            }
-            
-            .login-card {
-                padding: 20px 15px;
-            }
-            
-            .form-group {
-                margin-bottom: 15px;
-            }
-            
-            .features {
-                display: none;
-            }
+        .login-container {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .google-login-btn {
+            background: white;
+            color: #333;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin-top: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .google-login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .active-campaign-section {
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .campaign-status {
+            font-weight: bold;
+            color: gold;
+            margin-top: 10px;
+        }
+
+        .video-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .video-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .video-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        .video-item-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .video-item-channel {
+            font-size: 0.9em;
+            color: #ccc;
+        }
+
+        .logout-btn {
+            background: rgba(255, 0, 0, 0.2);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 0, 0, 0.4);
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <div class="logo">
-                <div class="logo-icon">
-                    <i class="fas fa-comment-sms"></i>
+        <!-- Login Page -->
+        <div id="loginPage" class="page active">
+            <div class="login-container">
+                <div class="logo">🎬</div>
+                <h1 class="app-title">Shakar Video Rewards</h1>
+                <p>वीडियो देखें, कोइन्स कमाएं!</p>
+                <button class="google-login-btn" onclick="googleLogin()">
+                    <span>Google से लॉगिन</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main App -->
+        <div id="appPage" class="page">
+            <div class="header">
+                <div class="user-info">
+                    <img id="userAvatar" class="user-avatar" src="" alt="User">
+                    <div class="user-name" id="userName"></div>
+                    <button class="logout-btn" onclick="logout()">लॉगआउट</button>
                 </div>
-                <div class="logo-text">
-                    <h1>Umesh SMM Service</h1>
-                    <p>Connect with your subscribers</p>
+                <div class="coins-display">
+                    कोइन्स: <span id="coinsCount">0</span>
+                </div>
+            </div>
+
+            <div class="nav-tabs">
+                <div class="nav-tab active" onclick="showPage('homePage')">होम</div>
+                <div class="nav-tab" onclick="showPage('subscribePage')">सब्सक्राइब</div>
+                <div class="nav-tab" onclick="showPage('campaignPage')">कैंपेन</div>
+            </div>
+
+            <!-- Home Page -->
+            <div id="homePage" class="page active">
+                <div class="video-container">
+                    <div class="video-title" id="currentVideoTitle">मजेदार वीडियो - 60 सेकंड</div>
+                    <div class="video-placeholder">
+                        🎥 वीडियो यहाँ दिखेगा
+                    </div>
+                    <div class="timer-display" id="timer">60s</div>
+                    <div class="video-controls">
+                        <button class="control-btn">👁️ <span class="btn-text">View</span></button>
+                        <button class="control-btn">👍 <span class="btn-text">Like</span></button>
+                        <button class="control-btn">🔔 <span class="btn-text">Subscribe</span></button>
+                    </div>
+                    <button class="watch-now-btn" onclick="startWatching()">Watch Now</button>
+                </div>
+            </div>
+
+            <!-- Subscribe Page -->
+            <div id="subscribePage" class="page">
+                <div class="video-container">
+                    <h3 style="text-align: center; margin-bottom: 15px;">सब्सक्राइब किए वीडियो</h3>
+                    <div class="video-list">
+                        <div class="video-item" onclick="selectVideo('सब्सक्राइब वीडियो 1')">
+                            <div class="video-item-title">सब्सक्राइब वीडियो 1</div>
+                            <div class="video-item-channel">चैनल: मनोरंजन दुनिया</div>
+                        </div>
+                        <div class="video-item" onclick="selectVideo('सब्सक्राइब वीडियो 2')">
+                            <div class="video-item-title">सब्सक्राइब वीडियो 2</div>
+                            <div class="video-item-channel">चैनल: फनी क्लिप्स</div>
+                        </div>
+                        <div class="video-item" onclick="selectVideo('सब्सक्राइब वीडियो 3')">
+                            <div class="video-item-title">सब्सक्राइब वीडियो 3</div>
+                            <div class="video-item-channel">चैनल: एजुकेशन हब</div>
+                        </div>
+                    </div>
+                    <button class="watch-now-btn" onclick="startWatching()">Watch Now</button>
+                </div>
+            </div>
+
+            <!-- Campaign Page -->
+            <div id="campaignPage" class="page">
+                <h3 style="text-align: center; margin-bottom: 15px;">अपना कैंपेन शुरू करें</h3>
+                <div class="campaign-item">
+                    <div class="campaign-title">बेसिक कैंपेन</div>
+                    <p>💰 लागत: 60 कोइन्स</p>
+                    <p>👥 रीच: 1 व्यक्ति</p>
+                    <p>⏱️ अवधि: 24 घंटे</p>
+                    <button class="start-campaign-btn" id="startCampaignBtn" onclick="startCampaign()">कैंपेन शुरू करें</button>
+                </div>
+                
+                <div class="active-campaign-section">
+                    <h4>आपका एक्टिव कैंपेन</h4>
+                    <div class="campaign-status" id="activeCampaign">कोई एक्टिव कैंपेन नहीं</div>
                 </div>
             </div>
         </div>
 
-        <div class="login-card">
-            <div class="card-header">
-                <h2>Welcome Back</h2>
-                <p>Sign in to your account</p>
+        <!-- Lock Overlay -->
+        <div class="lock-overlay" id="lockOverlay">
+            <div class="warning-message">
+                <h3 class="warning-title">⏳ कृपया प्रतीक्षा करें</h3>
+                <p id="remainingTime">60 सेकंड शेष</p>
+                <p style="color: red; margin: 15px 0; font-weight: bold;">वीडियो पूरा देखने पर ही कोइन्स मिलेंगे!</p>
+                <button class="watch-now-btn" style="background: #666; margin-top: 10px;" onclick="cancelWatching()">रद्द करें</button>
             </div>
-
-            <div class="error-message" id="errorMessage">
-                <i class="fas fa-exclamation-circle"></i> <span id="errorText"></span>
-            </div>
-
-            <div class="success-message" id="successMessage">
-                <i class="fas fa-check-circle"></i> <span id="successText"></span>
-            </div>
-
-            <div class="tabs">
-                <div class="tab active" data-tab="login">Login</div>
-                <div class="tab" data-tab="signup">Sign Up</div>
-            </div>
-
-            <!-- Login Form -->
-            <div class="tab-content active" id="loginTab">
-                <form class="login-form" id="loginForm">
-                    <div class="form-group">
-                        <label for="loginEmail">Email Address</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-envelope"></i>
-                            <input type="email" class="form-control" id="loginEmail" placeholder="Enter your email" required>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="loginPassword">Password</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-lock"></i>
-                            <input type="password" class="form-control" id="loginPassword" placeholder="Enter your password" required>
-                        </div>
-                    </div>
-
-                    <div class="options">
-                        <div class="remember-me">
-                            <input type="checkbox" id="remember">
-                            <label for="remember">Remember me</label>
-                        </div>
-                        <a href="#" class="forgot-password">Forgot Password?</a>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary" id="loginBtn">
-                        <span class="loading" id="loginLoading"></span>
-                        Sign In
-                    </button>
-                </form>
-
-                <div class="divider">
-                    <span>Or continue with</span>
-                </div>
-
-                <button class="btn btn-google" id="googleLoginBtn">
-                    <div class="google-icon"></div>
-                    Sign in with Google
-                </button>
-
-                <div class="debug-info" id="debugInfo">
-                    <strong>Debug Info:</strong><br>
-                    Firebase Status: <span id="firebaseStatus">Checking...</span><br>
-                    Auth Domain: <span id="authDomain">smm-6d588.firebaseapp.com</span>
-                </div>
-
-                <div class="signup-link">
-                    Don't have an account? <a href="#" id="switchToSignup">Sign up here</a>
-                </div>
-            </div>
-
-            <!-- Signup Form -->
-            <div class="tab-content" id="signupTab">
-                <form class="login-form" id="signupForm">
-                    <div class="form-group">
-                        <label for="signupName">Full Name</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-user"></i>
-                            <input type="text" class="form-control" id="signupName" placeholder="Enter your full name" required>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="signupEmail">Email Address</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-envelope"></i>
-                            <input type="email" class="form-control" id="signupEmail" placeholder="Enter your email" required>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="signupPassword">Password</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-lock"></i>
-                            <input type="password" class="form-control" id="signupPassword" placeholder="Create a password" required>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="confirmPassword">Confirm Password</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-lock"></i>
-                            <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm your password" required>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary" id="signupBtn">
-                        <span class="loading" id="signupLoading"></span>
-                        Create Account
-                    </button>
-                </form>
-
-                <div class="divider">
-                    <span>Or sign up with</span>
-                </div>
-
-                <button class="btn btn-google" id="googleSignupBtn">
-                    <div class="google-icon"></div>
-                    Sign up with Google
-                </button>
-
-                <div class="signup-link">
-                    Already have an account? <a href="#" id="switchToLogin">Login here</a>
-                </div>
-            </div>
-
-            <div class="features">
-                <div class="feature">
-                    <i class="fas fa-shield-alt"></i>
-                    <h3>Secure</h3>
-                    <p>Your data is protected</p>
-                </div>
-                <div class="feature">
-                    <i class="fas fa-bolt"></i>
-                    <h3>Fast</h3>
-                    <p>Quick SMS delivery</p>
-                </div>
-                <div class="feature">
-                    <i class="fas fa-headset"></i>
-                    <h3>Support</h3>
-                    <p>24/7 customer service</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="footer">
-            <p>&copy; 2023 Umesh SMM Service. All rights reserved.</p>
         </div>
     </div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    
     <script>
-        // Firebase configuration
+        // Firebase Configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyApbBwk5HuhrGXvWqXyjAjK_pkPcQfluY0",
+            apiKey: "AIzaSyApbBwk5HuhrGkXvWqXyjAjK_pkPcQfluY0",
             authDomain: "smm-6d588.firebaseapp.com",
+            databaseURL: "https://smm-6d588-default-rtdb.firebaseio.com",
             projectId: "smm-6d588",
             storageBucket: "smm-6d588.firebasestorage.app",
             messagingSenderId: "1053464540191",
             appId: "1:1053464540191:web:cd7cf55cdf14683808112a"
         };
 
-        // Debug info
-        document.getElementById('debugInfo').style.display = 'block';
-        document.getElementById('firebaseStatus').textContent = 'Initializing...';
-
         // Initialize Firebase
-        let auth;
-        try {
-            firebase.initializeApp(firebaseConfig);
-            auth = firebase.auth();
-            document.getElementById('firebaseStatus').textContent = 'Initialized Successfully';
-            console.log("Firebase initialized successfully");
-        } catch (error) {
-            document.getElementById('firebaseStatus').textContent = 'Initialization Failed: ' + error.message;
-            console.error("Firebase initialization error:", error);
+        firebase.initializeApp(firebaseConfig);
+
+        // Global variables
+        let currentUser = null;
+        let coins = 0;
+        let timer = null;
+        let timeLeft = 60;
+        let isWatching = false;
+        let currentVideoTitle = "मजेदार वीडियो - 60 सेकंड";
+
+        // DOM Elements
+        const loginPage = document.getElementById('loginPage');
+        const appPage = document.getElementById('appPage');
+        const coinsCount = document.getElementById('coinsCount');
+        const userName = document.getElementById('userName');
+        const userAvatar = document.getElementById('userAvatar');
+        const timerDisplay = document.getElementById('timer');
+        const lockOverlay = document.getElementById('lockOverlay');
+        const remainingTime = document.getElementById('remainingTime');
+        const currentVideoTitleElement = document.getElementById('currentVideoTitle');
+        const startCampaignBtn = document.getElementById('startCampaignBtn');
+        const activeCampaign = document.getElementById('activeCampaign');
+
+        // Firebase Auth and Database
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        // Google Login Function
+        async function googleLogin() {
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                const result = await auth.signInWithPopup(provider);
+                currentUser = result.user;
+                await initializeUser();
+                showApp();
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('लॉगिन में समस्या आई। पुनः प्रयास करें।');
+            }
         }
 
-        // UI Elements
-        const loginForm = document.getElementById('loginForm');
-        const signupForm = document.getElementById('signupForm');
-        const loginBtn = document.getElementById('loginBtn');
-        const signupBtn = document.getElementById('signupBtn');
-        const googleLoginBtn = document.getElementById('googleLoginBtn');
-        const googleSignupBtn = document.getElementById('googleSignupBtn');
-        const loginLoading = document.getElementById('loginLoading');
-        const signupLoading = document.getElementById('signupLoading');
-        const errorMessage = document.getElementById('errorMessage');
-        const errorText = document.getElementById('errorText');
-        const successMessage = document.getElementById('successMessage');
-        const successText = document.getElementById('successText');
-        const tabs = document.querySelectorAll('.tab');
-        const tabContents = document.querySelectorAll('.tab-content');
-        const switchToSignup = document.getElementById('switchToSignup');
-        const switchToLogin = document.getElementById('switchToLogin');
+        // Logout Function
+        function logout() {
+            if (confirm("क्या आप लॉगआउट करना चाहते हैं?")) {
+                auth.signOut();
+            }
+        }
 
-        // Initially hide loading spinners
-        loginLoading.style.display = 'none';
-        signupLoading.style.display = 'none';
-
-        // Tab switching functionality
-        tabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const tabId = tab.getAttribute('data-tab');
-                
-                // Update active tab
-                tabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                
-                // Show corresponding content
-                tabContents.forEach(content => {
-                    content.classList.remove('active');
-                    if (content.id === `${tabId}Tab`) {
-                        content.classList.add('active');
-                    }
+        // Initialize User Data
+        async function initializeUser() {
+            const userRef = database.ref('users/' + currentUser.uid);
+            const snapshot = await userRef.once('value');
+            
+            if (!snapshot.exists()) {
+                // New user - initialize with 0 coins
+                await userRef.set({
+                    name: currentUser.displayName,
+                    email: currentUser.email,
+                    coins: 0,
+                    createdAt: firebase.database.ServerValue.TIMESTAMP
                 });
-                
-                // Clear messages when switching tabs
-                hideMessages();
-            });
-        });
-
-        // Switch to signup from login link
-        switchToSignup.addEventListener('click', (e) => {
-            e.preventDefault();
-            document.querySelector('.tab[data-tab="signup"]').click();
-        });
-
-        // Switch to login from signup link
-        switchToLogin.addEventListener('click', (e) => {
-            e.preventDefault();
-            document.querySelector('.tab[data-tab="login"]').click();
-        });
-
-        // Show error message
-        function showError(message) {
-            errorText.textContent = message;
-            errorMessage.style.display = 'block';
-            successMessage.style.display = 'none';
+                coins = 0;
+            } else {
+                // Existing user - load coins
+                const userData = snapshot.val();
+                coins = userData.coins || 0;
+            }
+            
+            // Check for active campaign
+            const campaignRef = database.ref('campaigns/' + currentUser.uid);
+            const campaignSnapshot = await campaignRef.once('value');
+            if (campaignSnapshot.exists() && campaignSnapshot.val().active) {
+                activeCampaign.textContent = 'बेसिक कैंपेन - 1 व्यक्ति तक पहुँच';
+            }
+            
+            updateUI();
         }
 
-        // Show success message
-        function showSuccess(message) {
-            successText.textContent = message;
-            successMessage.style.display = 'block';
-            errorMessage.style.display = 'none';
+        // Update UI with user data
+        function updateUI() {
+            coinsCount.textContent = coins;
+            userName.textContent = currentUser.displayName;
+            userAvatar.src = currentUser.photoURL;
+            
+            // Update campaign button state
+            startCampaignBtn.disabled = coins < 60;
         }
 
-        // Hide all messages
-        function hideMessages() {
-            errorMessage.style.display = 'none';
-            successMessage.style.display = 'none';
+        // Show main app after login
+        function showApp() {
+            loginPage.classList.remove('active');
+            appPage.classList.add('active');
         }
 
-        // Google Authentication Function
-        function signInWithGoogle() {
-            if (!auth) {
-                showError("Firebase not initialized. Please check console for errors.");
-                return;
-            }
-
-            const provider = new firebase.auth.GoogleAuthProvider();
-            
-            // Add scopes if needed
-            provider.addScope('profile');
-            provider.addScope('email');
-            
-            // Show loading state
-            const currentBtn = event.currentTarget;
-            const originalText = currentBtn.innerHTML;
-            currentBtn.innerHTML = '<span class="loading"></span> Connecting...';
-            currentBtn.disabled = true;
-            
-            auth.signInWithPopup(provider)
-                .then((result) => {
-                    // User signed in successfully
-                    const user = result.user;
-                    showSuccess(`Welcome ${user.displayName}! Redirecting to dashboard...`);
-                    console.log("Google sign in successful:", user);
-                    
-                    // In a real app, redirect to dashboard
-                    setTimeout(() => {
-                        // window.location.href = 'dashboard.html';
-                        console.log("Redirecting to dashboard...");
-                    }, 2000);
-                })
-                .catch((error) => {
-                    // Handle errors
-                    console.error("Google sign in error:", error);
-                    
-                    let errorMessage = "Google sign in failed. ";
-                    
-                    switch(error.code) {
-                        case 'auth/popup-blocked':
-                            errorMessage += "Popup was blocked by browser. Please allow popups for this site.";
-                            break;
-                        case 'auth/popup-closed-by-user':
-                            errorMessage += "Popup was closed before completing sign in.";
-                            break;
-                        case 'auth/unauthorized-domain':
-                            errorMessage += "This domain is not authorized for OAuth operations. Please check Firebase console settings.";
-                            break;
-                        case 'auth/operation-not-allowed':
-                            errorMessage += "Google sign in is not enabled. Please enable it in Firebase console.";
-                            break;
-                        default:
-                            errorMessage += error.message;
-                    }
-                    
-                    showError(errorMessage);
-                    
-                    // Reset button
-                    currentBtn.innerHTML = originalText;
-                    currentBtn.disabled = false;
-                });
-        }
-
-        // Regular login handler
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            
-            if (!email || !password) {
-                showError('Please enter both email and password');
-                return;
-            }
-            
-            // Show loading state
-            loginLoading.style.display = 'inline-block';
-            loginBtn.disabled = true;
-            
-            // Firebase email/password authentication
-            auth.signInWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    // Signed in successfully
-                    const user = userCredential.user;
-                    showSuccess(`Welcome back! Redirecting to dashboard...`);
-                    
-                    // In a real app, redirect to dashboard
-                    setTimeout(() => {
-                        // window.location.href = 'dashboard.html';
-                        console.log("User logged in:", user.email);
-                    }, 1500);
-                })
-                .catch((error) => {
-                    // Handle errors
-                    loginLoading.style.display = 'none';
-                    loginBtn.disabled = false;
-                    
-                    let errorMsg = "Login failed. Please try again.";
-                    switch(error.code) {
-                        case 'auth/invalid-email':
-                            errorMsg = "Invalid email address.";
-                            break;
-                        case 'auth/user-disabled':
-                            errorMsg = "This account has been disabled.";
-                            break;
-                        case 'auth/user-not-found':
-                            errorMsg = "No account found with this email.";
-                            break;
-                        case 'auth/wrong-password':
-                            errorMsg = "Incorrect password.";
-                            break;
-                        default:
-                            errorMsg = error.message;
-                    }
-                    
-                    showError(errorMsg);
-                });
-        });
-
-        // Regular signup handler
-        signupForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const name = document.getElementById('signupName').value;
-            const email = document.getElementById('signupEmail').value;
-            const password = document.getElementById('signupPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            
-            if (!name || !email || !password || !confirmPassword) {
-                showError('Please fill in all fields');
-                return;
-            }
-            
-            if (password !== confirmPassword) {
-                showError('Passwords do not match');
-                return;
-            }
-            
-            if (password.length < 6) {
-                showError('Password should be at least 6 characters');
-                return;
-            }
-            
-            // Show loading state
-            signupLoading.style.display = 'inline-block';
-            signupBtn.disabled = true;
-            
-            // Firebase email/password signup
-            auth.createUserWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    // Signed up successfully
-                    const user = userCredential.user;
-                    
-                    // Update profile with display name
-                    return user.updateProfile({
-                        displayName: name
-                    }).then(() => {
-                        showSuccess(`Account created successfully! Welcome to Umesh SMM Service.`);
-                        
-                        // In a real app, redirect to dashboard
-                        setTimeout(() => {
-                            // window.location.href = 'dashboard.html';
-                            console.log("User signed up:", user.email);
-                        }, 1500);
-                    });
-                })
-                .catch((error) => {
-                    // Handle errors
-                    signupLoading.style.display = 'none';
-                    signupBtn.disabled = false;
-                    
-                    let errorMsg = "Sign up failed. Please try again.";
-                    switch(error.code) {
-                        case 'auth/email-already-in-use':
-                            errorMsg = "An account with this email already exists.";
-                            break;
-                        case 'auth/invalid-email':
-                            errorMsg = "Invalid email address.";
-                            break;
-                        case 'auth/weak-password':
-                            errorMsg = "Password is too weak.";
-                            break;
-                        default:
-                            errorMsg = error.message;
-                    }
-                    
-                    showError(errorMsg);
-                });
-        });
-
-        // Google Sign In for both login and signup
-        googleLoginBtn.addEventListener('click', signInWithGoogle);
-        googleSignupBtn.addEventListener('click', signInWithGoogle);
-
-        // Check if user is already signed in
-        if (auth) {
-            auth.onAuthStateChanged((user) => {
-                if (user) {
-                    // User is signed in, redirect to dashboard
-                    console.log("User already signed in:", user.displayName || user.email);
-                    showSuccess(`Welcome back! Redirecting to dashboard...`);
-                    
-                    // In a real app: window.location.href = 'dashboard.html';
+        // Show different pages
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                if (page.id !== 'appPage' && page.id !== 'loginPage') {
+                    page.classList.remove('active');
                 }
             });
-        }
-
-        // Add some interactive effects
-        document.querySelectorAll('.form-control').forEach(input => {
-            input.addEventListener('focus', function() {
-                this.parentElement.classList.add('focused');
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
             });
             
-            input.addEventListener('blur', function() {
-                if (!this.value) {
-                    this.parentElement.classList.remove('focused');
+            // Show selected page and activate tab
+            document.getElementById(pageId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Select video from list
+        function selectVideo(title) {
+            currentVideoTitle = title;
+            currentVideoTitleElement.textContent = title;
+            showPage('homePage');
+        }
+
+        // Start watching video
+        function startWatching() {
+            if (isWatching) return;
+            
+            isWatching = true;
+            timeLeft = 60;
+            lockOverlay.style.display = 'flex';
+            updateTimerDisplay();
+            
+            // Start countdown
+            timer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    completeWatching();
                 }
+            }, 1000);
+            
+            // Prevent user from clicking outside
+            document.addEventListener('click', preventClicks, true);
+            document.addEventListener('keydown', preventKeys, true);
+            document.addEventListener('contextmenu', preventClicks, true);
+        }
+
+        // Update timer display
+        function updateTimerDisplay() {
+            timerDisplay.textContent = timeLeft + 's';
+            remainingTime.textContent = timeLeft + ' सेकंड शेष';
+        }
+
+        // Complete watching and give rewards
+        function completeWatching() {
+            clearInterval(timer);
+            isWatching = false;
+            lockOverlay.style.display = 'none';
+            
+            // Add coins
+            coins += 60;
+            coinsCount.textContent = coins;
+            
+            // Update in database
+            database.ref('users/' + currentUser.uid).update({
+                coins: coins
             });
+            
+            // Update UI
+            updateUI();
+            
+            // Remove event listeners
+            document.removeEventListener('click', preventClicks, true);
+            document.removeEventListener('keydown', preventKeys, true);
+            document.removeEventListener('contextmenu', preventClicks, true);
+            
+            alert('🎉 बधाई! आपको 60 कोइन्स मिले हैं!');
+        }
+
+        // Cancel watching
+        function cancelWatching() {
+            if (timer) {
+                clearInterval(timer);
+            }
+            isWatching = false;
+            lockOverlay.style.display = 'none';
+            timeLeft = 60;
+            updateTimerDisplay();
+            
+            // Remove event listeners
+            document.removeEventListener('click', preventClicks, true);
+            document.removeEventListener('keydown', preventKeys, true);
+            document.removeEventListener('contextmenu', preventClicks, true);
+            
+            alert('वीडियो देखना रद्द किया गया। कोइन्स नहीं मिलेंगे।');
+        }
+
+        // Prevent clicks during video watching
+        function preventClicks(event) {
+            if (isWatching && !event.target.closest('.warning-message')) {
+                event.stopPropagation();
+                event.preventDefault();
+                alert(`⚠️ कृपया ${timeLeft} सेकंड प्रतीक्षा करें! वीडियो पूरा देखने पर ही कोइन्स मिलेंगे।`);
+            }
+        }
+
+        // Prevent keyboard during video watching
+        function preventKeys(event) {
+            if (isWatching) {
+                event.stopPropagation();
+                event.preventDefault();
+                alert(`⚠️ कृपया ${timeLeft} सेकंड प्रतीक्षा करें! वीडियो पूरा देखने पर ही कोइन्स मिलेंगे।`);
+            }
+        }
+
+        // Start campaign
+        function startCampaign() {
+            if (coins < 60) {
+                alert('❌ अपर्याप्त कोइन्स! कैंपेन शुरू करने के लिए 60 कोइन्स चाहिए।');
+                return;
+            }
+            
+            if (confirm('क्या आप 60 कोइन्स खर्च करके कैंपेन शुरू करना चाहते हैं?')) {
+                coins -= 60;
+                coinsCount.textContent = coins;
+                
+                // Update in database
+                database.ref('users/' + currentUser.uid).update({
+                    coins: coins
+                });
+                
+                // Save campaign
+                const campaignRef = database.ref('campaigns/' + currentUser.uid);
+                campaignRef.set({
+                    active: true,
+                    startedAt: firebase.database.ServerValue.TIMESTAMP,
+                    cost: 60,
+                    reach: 1
+                });
+                
+                activeCampaign.textContent = 'बेसिक कैंपेन - 1 व्यक्ति तक पहुँच';
+                updateUI();
+                alert('✅ कैंपेन सफलतापूर्वक शुरू हो गया!');
+            }
+        }
+
+        // Check auth state
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                currentUser = user;
+                initializeUser();
+                showApp();
+            } else {
+                loginPage.classList.add('active');
+                appPage.classList.remove('active');
+            }
         });
 
-        // Test Firebase connection
-        console.log("Testing Firebase connection...");
-        if (auth) {
-            auth.signInAnonymously()
-                .then(() => {
-                    console.log("Firebase connection test successful");
-                    auth.signOut(); // Sign out anonymous user
-                })
-                .catch(error => {
-                    console.error("Firebase connection test failed:", error);
-                });
-        }
+        // Initialize app
+        window.addEventListener('load', () => {
+            console.log("Shakar Video Rewards App Loaded");
+        });
     </script>
 </body>
 </html>
