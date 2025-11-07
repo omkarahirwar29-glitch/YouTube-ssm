@@ -1,0 +1,493 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Umesh Digital Fact</title>
+<style>
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #7b2ff7, #f107a3);
+  color: white;
+  margin: 0;
+  text-align: center;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+header {
+  background: rgba(0,0,0,0.3);
+  padding: 15px;
+  font-size: 22px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+#content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+button {
+  background: #fff;
+  color: #000;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  margin: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+button:hover {
+  background: #f107a3;
+  color: #fff;
+}
+.navbar {
+  display: flex;
+  justify-content: space-around;
+  background: rgba(0,0,0,0.3);
+  padding: 10px 0;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+}
+.tab {
+  display: none;
+}
+.active {
+  display: block;
+}
+.input-box {
+  margin: 15px 0;
+}
+input {
+  padding: 10px;
+  width: 80%;
+  border-radius: 10px;
+  border: none;
+  text-align: center;
+}
+.request-card {
+  background: rgba(255,255,255,0.2);
+  border-radius: 10px;
+  margin: 10px;
+  padding: 10px;
+}
+#logoutBtn {
+  background: #ff3b3b;
+  color: white;
+}
+</style>
+</head>
+<body>
+
+<header>Umesh Digital Fact</header>
+
+<div id="loginSection">
+  <h2>Login with Google</h2>
+  <button id="loginBtn">Sign in with Google</button>
+</div>
+
+<div id="content" style="display:none;">
+  <div id="userInfo"></div>
+  
+  <div id="homeTab" class="tab active">
+    <div class="input-box">
+      <input type="text" id="ytLink" placeholder="Enter YouTube Channel Link">
+    </div>
+    <div>
+      <button onclick="selectAmount(50)">₹50</button>
+      <button onclick="selectAmount(100)">₹100</button>
+    </div>
+    <p id="selectedAmountText"></p>
+    <button id="submitBtn" onclick="submitRequest()">Submit</button>
+    <p id="message"></p>
+  </div>
+  
+  <div id="historyTab" class="tab">
+    <h3>Request History</h3>
+    <div id="historyList"></div>
+  </div>
+  
+  <div id="videoTab" class="tab">
+    <h3>Watch Our Videos</h3>
+    <iframe width="90%" height="200" src="https://www.youtube.com/embed/?listType=user_uploads&list=UmeshDigitalFact" frameborder="0" allowfullscreen></iframe>
+  </div>
+</div>
+
+<div class="navbar">
+  <button onclick="showTab('homeTab')">🏠 Home</button>
+  <button onclick="showTab('historyTab')">📜 History</button>
+  <button onclick="showTab('videoTab')">🎥 Video</button>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+  import { getDatabase, ref, push, set, get, child } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyApbBwk5HuhrGXvWqXyjAjK_pkPcQfluY0",
+    authDomain: "smm-6d588.firebaseapp.com",
+    databaseURL: "https://smm-6d588-default-rtdb.firebaseio.com",
+    projectId: "smm-6d588",
+    storageBucket: "smm-6d588.firebasestorage.app",
+    messagingSenderId: "1053464540191",
+    appId: "1:1053464540191:web:cd7cf55cdf14683808112a"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+  const db = getDatabase(app);
+
+  const loginSection = document.getElementById('loginSection');
+  const content = document.getElementById('content');
+  const userInfo = document.getElementById('userInfo');
+  let selectedAmount = null;
+  let currentUser = null;
+
+  document.getElementById("loginBtn").addEventListener("click", () => {
+    signInWithPopup(auth, provider);
+  });
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      currentUser = user;
+      loginSection.style.display = "none";
+      content.style.display = "block";
+      userInfo.innerHTML = `
+        <img src="${user.photoURL}" width="50" style="border-radius:50%">
+        <p>${user.displayName}</p>
+        <button id="logoutBtn">Logout</button>
+      `;
+      document.getElementById("logoutBtn").onclick = () => signOut(auth);
+      loadHistory();
+    } else {
+      loginSection.style.display = "block";
+      content.style.display = "none";
+    }
+  });
+
+  function selectAmount(amount) {
+    selectedAmount = amount;
+    document.getElementById("selectedAmountText").textContent = "Selected: ₹" + amount;
+  }
+
+  async function submitRequest() {
+    const ytLink = document.getElementById("ytLink").value.trim();
+    if (!ytLink || !selectedAmount) {
+      alert("Please enter YouTube link and select amount");
+      return;
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    const userRef = ref(db, "requests/" + currentUser.uid);
+    const snapshot = await get(userRef);
+    let alreadySubmitted = false;
+
+    if (snapshot.exists()) {
+      snapshot.forEach(childSnap => {
+        if (childSnap.val().date === today) alreadySubmitted = true;
+      });
+    }
+
+    if (alreadySubmitted) {
+      document.getElementById("message").textContent = "You already submitted request today!";
+      return;
+    }
+
+    const newReq = push(userRef);
+    await set(newReq, {
+      link: ytLink,
+      amount: selectedAmount,
+      status: "Pending",
+      date: today
+    });
+
+    document.getElementById("message").textContent = "Request submitted!";
+    document.getElementById("ytLink").value = "";
+    document.getElementById("selectedAmountText").textContent = "";
+    selectedAmount = null;
+    loadHistory();
+  }
+
+  async function loadHistory() {
+    const list = document.getElementById("historyList");
+    list.innerHTML = "";
+    const userRef = ref(db, "requests/" + currentUser.uid);
+    const snapshot = await get(userRef);
+
+    if (snapshot.exists()) {
+      snapshot.forEach(childSnap => {
+        const data = childSnap.val();
+        const div = document.createElement("div");
+        div.className = "request-card";
+        div.innerHTML = `
+          <p><b>Link:</b> ${data.link}</p>
+          <p><b>Amount:</b> ₹${data.amount}</p>
+          <p><b>Status:</b> ${data.status}</p>
+          <p><b>Date:</b> ${data.date}</p>
+        `;
+        list.appendChild(div);
+      });
+    } else {
+      list.innerHTML = "<p>No requests yet.</p>";
+    }
+  }
+
+  window.showTab = function(tabId) {
+    document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
+    document.getElementById(tabId).classList.add("active");
+  }
+</script>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Umesh Digital Fact</title>
+<style>
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #7b2ff7, #f107a3);
+  color: white;
+  margin: 0;
+  text-align: center;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+header {
+  background: rgba(0,0,0,0.3);
+  padding: 15px;
+  font-size: 22px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+#content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+button {
+  background: #fff;
+  color: #000;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  margin: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+button:hover {
+  background: #f107a3;
+  color: #fff;
+}
+.navbar {
+  display: flex;
+  justify-content: space-around;
+  background: rgba(0,0,0,0.3);
+  padding: 10px 0;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+}
+.tab {
+  display: none;
+}
+.active {
+  display: block;
+}
+.input-box {
+  margin: 15px 0;
+}
+input {
+  padding: 10px;
+  width: 80%;
+  border-radius: 10px;
+  border: none;
+  text-align: center;
+}
+.request-card {
+  background: rgba(255,255,255,0.2);
+  border-radius: 10px;
+  margin: 10px;
+  padding: 10px;
+}
+#logoutBtn {
+  background: #ff3b3b;
+  color: white;
+}
+</style>
+</head>
+<body>
+
+<header>Umesh Digital Fact</header>
+
+<div id="loginSection">
+  <h2>Login with Google</h2>
+  <button id="loginBtn">Sign in with Google</button>
+</div>
+
+<div id="content" style="display:none;">
+  <div id="userInfo"></div>
+  
+  <div id="homeTab" class="tab active">
+    <div class="input-box">
+      <input type="text" id="ytLink" placeholder="Enter YouTube Channel Link">
+    </div>
+    <div>
+      <button onclick="selectAmount(50)">₹50</button>
+      <button onclick="selectAmount(100)">₹100</button>
+    </div>
+    <p id="selectedAmountText"></p>
+    <button id="submitBtn" onclick="submitRequest()">Submit</button>
+    <p id="message"></p>
+  </div>
+  
+  <div id="historyTab" class="tab">
+    <h3>Request History</h3>
+    <div id="historyList"></div>
+  </div>
+  
+  <div id="videoTab" class="tab">
+    <h3>Watch Our Videos</h3>
+    <iframe width="90%" height="200" src="https://www.youtube.com/embed/?listType=user_uploads&list=UmeshDigitalFact" frameborder="0" allowfullscreen></iframe>
+  </div>
+</div>
+
+<div class="navbar">
+  <button onclick="showTab('homeTab')">🏠 Home</button>
+  <button onclick="showTab('historyTab')">📜 History</button>
+  <button onclick="showTab('videoTab')">🎥 Video</button>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+  import { getDatabase, ref, push, set, get, child } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyApbBwk5HuhrGXvWqXyjAjK_pkPcQfluY0",
+    authDomain: "smm-6d588.firebaseapp.com",
+    databaseURL: "https://smm-6d588-default-rtdb.firebaseio.com",
+    projectId: "smm-6d588",
+    storageBucket: "smm-6d588.firebasestorage.app",
+    messagingSenderId: "1053464540191",
+    appId: "1:1053464540191:web:cd7cf55cdf14683808112a"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+  const db = getDatabase(app);
+
+  const loginSection = document.getElementById('loginSection');
+  const content = document.getElementById('content');
+  const userInfo = document.getElementById('userInfo');
+  let selectedAmount = null;
+  let currentUser = null;
+
+  document.getElementById("loginBtn").addEventListener("click", () => {
+    signInWithPopup(auth, provider);
+  });
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      currentUser = user;
+      loginSection.style.display = "none";
+      content.style.display = "block";
+      userInfo.innerHTML = `
+        <img src="${user.photoURL}" width="50" style="border-radius:50%">
+        <p>${user.displayName}</p>
+        <button id="logoutBtn">Logout</button>
+      `;
+      document.getElementById("logoutBtn").onclick = () => signOut(auth);
+      loadHistory();
+    } else {
+      loginSection.style.display = "block";
+      content.style.display = "none";
+    }
+  });
+
+  function selectAmount(amount) {
+    selectedAmount = amount;
+    document.getElementById("selectedAmountText").textContent = "Selected: ₹" + amount;
+  }
+
+  async function submitRequest() {
+    const ytLink = document.getElementById("ytLink").value.trim();
+    if (!ytLink || !selectedAmount) {
+      alert("Please enter YouTube link and select amount");
+      return;
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    const userRef = ref(db, "requests/" + currentUser.uid);
+    const snapshot = await get(userRef);
+    let alreadySubmitted = false;
+
+    if (snapshot.exists()) {
+      snapshot.forEach(childSnap => {
+        if (childSnap.val().date === today) alreadySubmitted = true;
+      });
+    }
+
+    if (alreadySubmitted) {
+      document.getElementById("message").textContent = "You already submitted request today!";
+      return;
+    }
+
+    const newReq = push(userRef);
+    await set(newReq, {
+      link: ytLink,
+      amount: selectedAmount,
+      status: "Pending",
+      date: today
+    });
+
+    document.getElementById("message").textContent = "Request submitted!";
+    document.getElementById("ytLink").value = "";
+    document.getElementById("selectedAmountText").textContent = "";
+    selectedAmount = null;
+    loadHistory();
+  }
+
+  async function loadHistory() {
+    const list = document.getElementById("historyList");
+    list.innerHTML = "";
+    const userRef = ref(db, "requests/" + currentUser.uid);
+    const snapshot = await get(userRef);
+
+    if (snapshot.exists()) {
+      snapshot.forEach(childSnap => {
+        const data = childSnap.val();
+        const div = document.createElement("div");
+        div.className = "request-card";
+        div.innerHTML = `
+          <p><b>Link:</b> ${data.link}</p>
+          <p><b>Amount:</b> ₹${data.amount}</p>
+          <p><b>Status:</b> ${data.status}</p>
+          <p><b>Date:</b> ${data.date}</p>
+        `;
+        list.appendChild(div);
+      });
+    } else {
+      list.innerHTML = "<p>No requests yet.</p>";
+    }
+  }
+
+  window.showTab = function(tabId) {
+    document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
+    document.getElementById(tabId).classList.add("active");
+  }
+</script>
+
+</body>
+</html>
